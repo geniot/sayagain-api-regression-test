@@ -1,0 +1,38 @@
+openapi: 3.0.0
+info:
+  title: Recipes API
+  description: Application which allows users to manage their favourite recipes.
+  version: 0.0.1
+servers:
+  - url: https://sayagain.app/api
+    description: Main (production) server
+  - url: http://localhost:8002/sayagain/api
+    description: Localhost (dev) server
+paths:
+  /recipes:
+    get:
+      summary: Get recipes
+      operationId: getRecipes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#components/schemas/Recipe'
+components:
+  schemas:
+    Recipe:
+      title: Recipe
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        servings:
+          type: integer
+        vegetarian:
+          type: boolean
