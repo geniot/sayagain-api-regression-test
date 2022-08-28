@@ -1,6 +1,7 @@
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -16,7 +17,9 @@ public class TestBase {
 
             //Rest Assured config
             RestAssured.baseURI = props.getProperty("api.uri");
-            RestAssured.port = Integer.valueOf(props.getProperty("api.port"));
+            if (!StringUtils.isEmpty(props.getProperty("api.port"))) {
+                RestAssured.port = Integer.parseInt(props.getProperty("api.port"));
+            }
             RestAssured.basePath = props.getProperty("api.path");
 
         } catch (IOException ex) {
