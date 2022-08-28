@@ -1,4 +1,6 @@
 import io.restassured.RestAssured;
+import io.restassured.filter.log.RequestLoggingFilter;
+import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +23,7 @@ public class TestBase {
                 RestAssured.port = Integer.parseInt(props.getProperty("api.port"));
             }
             RestAssured.basePath = props.getProperty("api.path");
+            RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
 
         } catch (IOException ex) {
             ex.printStackTrace();

@@ -20,8 +20,34 @@ paths:
             application/json:
               schema:
                 $ref: '#components/schemas/Recipe'
+  /recipes/search:
+    post:
+      summary: Get filtered recipes
+      operationId: getFilteredRecipes
+      requestBody:
+        description: Search criteria
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchCriteria'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#components/schemas/Recipe'
 components:
   schemas:
+    Ingredient:
+      title: Ingredient
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
     Recipe:
       title: Recipe
       type: object
@@ -36,3 +62,21 @@ components:
           type: integer
         vegetarian:
           type: boolean
+    SearchCriteria:
+      title: SearchCriteria
+      type: object
+      properties:
+        servings:
+          type: integer
+        vegetarian:
+          type: boolean
+        includeIngredients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ingredient'
+        excludeIngredients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ingredient'
+        fullTextQuery:
+          type: string
