@@ -1,15 +1,28 @@
+import io.github.geniot.sayagain.gen.model.RecipeDto;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
+import org.junit.Before;
 
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Random;
+import java.util.UUID;
 
 public class TestBase {
     public RequestSpecification REQUEST;
+
+    Random random = new Random(System.currentTimeMillis());
+
+    @Before
+    public void setup() {
+        REQUEST.delete("/recipes").then().statusCode(HttpStatus.SC_OK);
+        REQUEST.delete("/ingredients").then().statusCode(HttpStatus.SC_OK);
+    }
 
     public TestBase() {
         try {
@@ -30,5 +43,14 @@ public class TestBase {
         }
         //basic request setting
         REQUEST = RestAssured.given().contentType(ContentType.JSON);
+    }
+
+    RecipeDto createRecipe() {
+        RecipeDto inRecipeDto = new RecipeDto();
+        inRecipeDto.setTitle(UUID.randomUUID().toString());
+        inRecipeDto.setDescription(UUID.randomUUID().toString());
+        inRecipeDto.setVegetarian(random.nextBoolean());
+        inRecipeDto.setServings(random.nextInt());
+        return inRecipeDto;
     }
 }

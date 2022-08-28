@@ -3,24 +3,14 @@ import io.github.geniot.sayagain.gen.model.SearchCriteriaDto;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.Random;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 
 public class RecipesTest extends TestBase {
-
-    Random random = new Random(System.currentTimeMillis());
-
-    @Before
-    public void setup() {
-        REQUEST.delete("/recipes").then().statusCode(HttpStatus.SC_OK);
-    }
 
     @Test
     public void shouldHaveStatus200ForAllRecipesList() {
@@ -92,13 +82,6 @@ public class RecipesTest extends TestBase {
         assertEquals(expectedSize, outRecipesListDto.size());
     }
 
-    private RecipeDto createRecipe() {
-        RecipeDto inRecipeDto = new RecipeDto();
-        inRecipeDto.setTitle(UUID.randomUUID().toString());
-        inRecipeDto.setDescription(UUID.randomUUID().toString());
-        inRecipeDto.setVegetarian(random.nextBoolean());
-        inRecipeDto.setServings(random.nextInt());
-        return inRecipeDto;
-    }
+
 
 }
