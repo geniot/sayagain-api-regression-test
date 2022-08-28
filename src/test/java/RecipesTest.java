@@ -127,7 +127,7 @@ public class RecipesTest extends TestBase {
                 createIngredient("potatoes"),
                 createIngredient("salt")));
 
-        RecipeDto outRecipeDto = REQUEST.body(inRecipeDto).post("/recipes").as(RecipeDto.class);
+        REQUEST.body(inRecipeDto).post("/recipes").as(RecipeDto.class);
 
         searchCriteriaDto.setIncludeIngredients(List.of(createIngredient("sugar")));
         search(searchCriteriaDto, 0);
@@ -138,6 +138,21 @@ public class RecipesTest extends TestBase {
         searchCriteriaDto.setIncludeIngredients(null);
         searchCriteriaDto.setExcludeIngredients(List.of(createIngredient("salt")));
         search(searchCriteriaDto, 0);
+    }
+
+    @Test
+    public void shouldSearchByKeywords() {
+        SearchCriteriaDto searchCriteriaDto = new SearchCriteriaDto();
+
+        RecipeDto inRecipeDto = createRecipe();
+        inRecipeDto.setDescription("some interesting recipe");
+        REQUEST.body(inRecipeDto).post("/recipes").as(RecipeDto.class);
+
+        searchCriteriaDto.setFullTextQuery("any");
+        search(searchCriteriaDto, 0);
+
+        searchCriteriaDto.setFullTextQuery("interest");
+        search(searchCriteriaDto, 1);
     }
 
     private void search(SearchCriteriaDto searchCriteriaDto, int expectedSize) {
