@@ -37,7 +37,7 @@ public class IngredientsTest extends TestBase {
         assertNotNull(outRecipeDto.getIngredients());
         outRecipeDto.getIngredients().remove(0);
 
-        REQUEST.body(outRecipeDto).patch("/recipes");
+        REQUEST.body(outRecipeDto).put("/recipes");
 
         RecipeDto outPatchedRecipeDto = REQUEST.get("/recipes/" + outRecipeDto.getId()).as(RecipeDto.class);
         assertNotNull(outPatchedRecipeDto.getIngredients());

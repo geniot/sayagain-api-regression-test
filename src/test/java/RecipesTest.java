@@ -35,7 +35,7 @@ public class RecipesTest extends TestBase {
 
         //patch
         outRecipeDto.setTitle(null);
-        REQUEST.body(outRecipeDto).patch("/recipes");
+        REQUEST.body(outRecipeDto).put("/recipes");
 
         RecipeDto outPatchedRecipeDto = REQUEST.get("/recipes/" + outRecipeDto.getId()).as(RecipeDto.class);
         assertNull(outPatchedRecipeDto.getTitle());
@@ -64,7 +64,7 @@ public class RecipesTest extends TestBase {
         search(searchCriteriaDto, 0);
 
         outRecipeDto.setVegetarian(true);
-        REQUEST.body(outRecipeDto).patch("/recipes");
+        REQUEST.body(outRecipeDto).put("/recipes");
 
         search(searchCriteriaDto, 1);
 
@@ -85,7 +85,7 @@ public class RecipesTest extends TestBase {
         search(searchCriteriaDto, 0);
 
         outRecipeDto.setServings(2);
-        REQUEST.body(outRecipeDto).patch("/recipes");
+        REQUEST.body(outRecipeDto).put("/recipes");
 
         search(searchCriteriaDto, 1);
 
@@ -108,7 +108,7 @@ public class RecipesTest extends TestBase {
         search(searchCriteriaDto, 0);
 
         outRecipeDto.setVegetarian(true);
-        REQUEST.body(outRecipeDto).patch("/recipes");
+        REQUEST.body(outRecipeDto).put("/recipes");
 
         search(searchCriteriaDto, 1);
 
