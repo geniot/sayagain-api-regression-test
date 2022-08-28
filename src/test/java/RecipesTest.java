@@ -9,6 +9,7 @@ import java.util.Random;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
 
 public class RecipesTest extends TestBase {
 
@@ -32,7 +33,7 @@ public class RecipesTest extends TestBase {
     }
 
     @Test
-    public void shouldPutDelete() {
+    public void shouldPostDelete() {
         RecipeDto inRecipeDto = new RecipeDto();
         inRecipeDto.setTitle(UUID.randomUUID().toString());
         inRecipeDto.setDescription(UUID.randomUUID().toString());
@@ -44,10 +45,11 @@ public class RecipesTest extends TestBase {
         RecipeDto outRecipeDto = createRecipeResponse.as(RecipeDto.class);
 
         assertThat(inRecipeDto).usingRecursiveComparison().ignoringFields("id").isEqualTo(outRecipeDto);
+        assertNotNull(outRecipeDto.getId());
 
         REQUEST.get("/recipes").then().statusCode(200).body("", Matchers.hasSize(1));
-
-
+        REQUEST.delete("/recipes/" + outRecipeDto.getId()).then().statusCode(200);
+        REQUEST.get("/recipes").then().statusCode(200).body("", Matchers.hasSize(0));
     }
 
 
