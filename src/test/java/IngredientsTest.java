@@ -1,6 +1,4 @@
-import io.github.geniot.sayagain.gen.model.IngredientDto;
 import io.github.geniot.sayagain.gen.model.RecipeDto;
-import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -8,20 +6,15 @@ import org.junit.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.*;
 
 public class IngredientsTest extends TestBase {
 
     @Test
     public void shouldPostWithIngredients() {
         RecipeDto inRecipeDto = createRecipe();
-        IngredientDto ingredientDto = new IngredientDto();
-        ingredientDto.setName("potatoes");
-        inRecipeDto.setIngredients(List.of(ingredientDto));
-
-        //post
-        Response createRecipeResponse = REQUEST.body(inRecipeDto).post("/recipes");
-        createRecipeResponse.then().assertThat().statusCode(HttpStatus.SC_CREATED);
-        RecipeDto outRecipeDto = createRecipeResponse.as(RecipeDto.class);
+        inRecipeDto.setIngredients(List.of(createIngredient("potatoes")));
+        RecipeDto outRecipeDto = saveRecipe(inRecipeDto);
 
         assertThat(inRecipeDto).usingRecursiveComparison().ignoringFields("id", "ingredients.id").isEqualTo(outRecipeDto);
 
@@ -32,4 +25,24 @@ public class IngredientsTest extends TestBase {
                 .statusCode(HttpStatus.SC_OK)
                 .body("", Matchers.hasSize(1));
     }
+
+    @Test
+    public void shouldEditIngredients() {
+        RecipeDto inRecipeDto = createRecipe();
+        inRecipeDto.setIngredients(List.of(
+                createIngredient("potatoes"),
+                createIngredient("salt")));
+
+        RecipeDto outRecipeDto = saveRecipe(inRecipeDto);
+        assertNotNull(outRecipeDto.getIngredients());
+        outRecipeDto.getIngredients().remove(0);
+
+        REQUEST.body(outRecipeDto).patch("/recipes");
+
+        RecipeDto outPatchedRecipeDto = REQUEST.get("/recipes/" + outRecipeDto.getId()).as(RecipeDto.class);
+        assertNotNull(outPatchedRecipeDto.getIngredients());
+        assertEquals(1, outPatchedRecipeDto.getIngredients().size());
+    }
+
+
 }

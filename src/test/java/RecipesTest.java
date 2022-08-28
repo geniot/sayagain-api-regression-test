@@ -27,11 +27,7 @@ public class RecipesTest extends TestBase {
     @Test
     public void shouldPostPatchDelete() {
         RecipeDto inRecipeDto = createRecipe();
-
-        //post
-        Response createRecipeResponse = REQUEST.body(inRecipeDto).post("/recipes");
-        createRecipeResponse.then().assertThat().statusCode(HttpStatus.SC_CREATED);
-        RecipeDto outRecipeDto = createRecipeResponse.as(RecipeDto.class);
+        RecipeDto outRecipeDto = saveRecipe(inRecipeDto);
 
         assertThat(inRecipeDto).usingRecursiveComparison().ignoringFields("id").isEqualTo(outRecipeDto);
         assertNotNull(outRecipeDto.getId());
@@ -40,6 +36,7 @@ public class RecipesTest extends TestBase {
         //patch
         outRecipeDto.setTitle(null);
         REQUEST.body(outRecipeDto).patch("/recipes");
+
         RecipeDto outPatchedRecipeDto = REQUEST.get("/recipes/" + outRecipeDto.getId()).as(RecipeDto.class);
         assertNull(outPatchedRecipeDto.getTitle());
 
@@ -56,7 +53,7 @@ public class RecipesTest extends TestBase {
     }
 
     @Test
-    public void shouldSearchForRecipes() {
+    public void shouldSearchForRecipesVegetarian() {
         RecipeDto inRecipeDto = createRecipe();
         inRecipeDto.setVegetarian(false);
         RecipeDto outRecipeDto = REQUEST.body(inRecipeDto).post("/recipes").as(RecipeDto.class);
@@ -76,12 +73,78 @@ public class RecipesTest extends TestBase {
 
     }
 
+    @Test
+    public void shouldSearchForRecipesServings() {
+        RecipeDto inRecipeDto = createRecipe();
+        inRecipeDto.setServings(3);
+        RecipeDto outRecipeDto = REQUEST.body(inRecipeDto).post("/recipes").as(RecipeDto.class);
+
+        SearchCriteriaDto searchCriteriaDto = new SearchCriteriaDto();
+        searchCriteriaDto.setServings(2);
+
+        search(searchCriteriaDto, 0);
+
+        outRecipeDto.setServings(2);
+        REQUEST.body(outRecipeDto).patch("/recipes");
+
+        search(searchCriteriaDto, 1);
+
+        searchCriteriaDto.setServings(null);
+        search(searchCriteriaDto, 1);
+
+    }
+
+    @Test
+    public void shouldUseAnd() {
+        RecipeDto inRecipeDto = createRecipe();
+        inRecipeDto.setServings(3);
+        inRecipeDto.setVegetarian(false);
+        RecipeDto outRecipeDto = REQUEST.body(inRecipeDto).post("/recipes").as(RecipeDto.class);
+
+        SearchCriteriaDto searchCriteriaDto = new SearchCriteriaDto();
+        searchCriteriaDto.setServings(3);
+        searchCriteriaDto.setVegetarian(true);
+
+        search(searchCriteriaDto, 0);
+
+        outRecipeDto.setVegetarian(true);
+        REQUEST.body(outRecipeDto).patch("/recipes");
+
+        search(searchCriteriaDto, 1);
+
+        searchCriteriaDto.setVegetarian(null);
+        searchCriteriaDto.setServings(null);
+        search(searchCriteriaDto, 1);
+
+    }
+
+    @Test
+    public void shouldSearchByIngredients() {
+        SearchCriteriaDto searchCriteriaDto = new SearchCriteriaDto();
+        RecipeDto inRecipeDto = createRecipe();
+
+        inRecipeDto.setIngredients(List.of(
+                createIngredient("potatoes"),
+                createIngredient("salt")));
+
+        RecipeDto outRecipeDto = REQUEST.body(inRecipeDto).post("/recipes").as(RecipeDto.class);
+
+        searchCriteriaDto.setIncludeIngredients(List.of(createIngredient("sugar")));
+        search(searchCriteriaDto, 0);
+
+        searchCriteriaDto.setIncludeIngredients(List.of(createIngredient("salt")));
+        search(searchCriteriaDto, 1);
+
+        searchCriteriaDto.setIncludeIngredients(null);
+        searchCriteriaDto.setExcludeIngredients(List.of(createIngredient("salt")));
+        search(searchCriteriaDto, 0);
+    }
+
     private void search(SearchCriteriaDto searchCriteriaDto, int expectedSize) {
         Response searchResponse = REQUEST.body(searchCriteriaDto).post("/recipes/search");
         List<RecipeDto> outRecipesListDto = searchResponse.body().jsonPath().getList("", RecipeDto.class);
         assertEquals(expectedSize, outRecipesListDto.size());
     }
-
 
 
 }

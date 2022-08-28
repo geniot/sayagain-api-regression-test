@@ -1,8 +1,10 @@
+import io.github.geniot.sayagain.gen.model.IngredientDto;
 import io.github.geniot.sayagain.gen.model.RecipeDto;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -52,5 +54,17 @@ public class TestBase {
         inRecipeDto.setVegetarian(random.nextBoolean());
         inRecipeDto.setServings(random.nextInt());
         return inRecipeDto;
+    }
+
+    IngredientDto createIngredient(String name) {
+        IngredientDto ingredientDto = new IngredientDto();
+        ingredientDto.setName(name);
+        return ingredientDto;
+    }
+
+    RecipeDto saveRecipe(RecipeDto inRecipeDto) {
+        Response createRecipeResponse = REQUEST.body(inRecipeDto).post("/recipes");
+        createRecipeResponse.then().assertThat().statusCode(HttpStatus.SC_CREATED);
+        return createRecipeResponse.as(RecipeDto.class);
     }
 }
