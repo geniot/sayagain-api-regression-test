@@ -39,6 +39,7 @@ public class TestBase {
             }
             RestAssured.basePath = props.getProperty("api.path");
             RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+            RestAssured.useRelaxedHTTPSValidation();
 
         } catch (IOException ex) {
             ex.printStackTrace();
