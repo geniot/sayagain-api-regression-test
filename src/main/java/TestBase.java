@@ -67,4 +67,10 @@ public class TestBase {
         createRecipeResponse.then().assertThat().statusCode(HttpStatus.SC_CREATED);
         return createRecipeResponse.as(RecipeDto.class);
     }
+
+    RecipeDto loadRecipe(Integer id) {
+        Response getRecipeResponse = REQUEST.get("/recipes/" + id);
+        getRecipeResponse.then().assertThat().statusCode(HttpStatus.SC_OK);
+        return getRecipeResponse.as(RecipeDto.class);
+    }
 }

@@ -6,24 +6,114 @@ info:
 servers:
   - url: https://sayagain.app/api
     description: Main (production) server
-  - url: http://localhost:8002/sayagain/api
+  - url: http://localhost:8002/api
     description: Localhost (dev) server
+tags:
+  - name: recipe
+    description: Everything about your Recipes
+security:
+  - basicAuth: []
 paths:
   /recipes:
-    get:
-      summary: Get recipes
-      operationId: getRecipes
+    post:
+      security:
+        - basicAuth: []
+      tags:
+        - recipe
+      summary: Add a new recipe
+      operationId: postRecipe
+      requestBody:
+        description: Recipe
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Recipe'
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created
           content:
             application/json:
               schema:
-                $ref: '#components/schemas/Recipe'
+                $ref: '#/components/schemas/Recipe'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /recipes/{recipeId}:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+        - recipe
+      summary: Find recipe by id
+      operationId: getRecipe
+      parameters:
+        - name: recipeId
+          in: path
+          description: Recipe Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    put:
+      security:
+        - basicAuth: []
+      tags:
+        - recipe
+      summary: Update an existing recipe
+      operationId: putRecipe
+      parameters:
+        - name: recipeId
+          in: path
+          description: Recipe Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Successful operation
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Recipe'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    delete:
+      security:
+        - basicAuth: []
+      tags:
+        - recipe
+      summary: Delete an existing recipe
+      operationId: deleteRecipe
+      parameters:
+        - name: recipeId
+          in: path
+          description: Recipe Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
   /recipes/search:
     post:
-      summary: Get filtered recipes
-      operationId: getFilteredRecipes
+      security:
+        - basicAuth: []
+      tags:
+        - recipe
+      summary: Find recipes by search criteria
+      operationId: findRecipes
       requestBody:
         description: Search criteria
         required: true
@@ -37,8 +127,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#components/schemas/Recipe'
+                $ref: '#/components/schemas/Recipe'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
 components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
   schemas:
     Ingredient:
       title: Ingredient
@@ -48,6 +144,7 @@ components:
           type: integer
         name:
           type: string
+          example: potatoes
     Recipe:
       title: Recipe
       type: object
@@ -56,10 +153,13 @@ components:
           type: integer
         title:
           type: string
+          example: Potato Pancakes
         description:
           type: string
+          example: Finely grate potatoes and onion into a large bowl. Drain off any excess liquid.
         servings:
           type: integer
+          example: 2
         vegetarian:
           type: boolean
         ingredients:
@@ -72,6 +172,7 @@ components:
       properties:
         servings:
           type: integer
+          example: 2
         vegetarian:
           type: boolean
         includeIngredients:
@@ -82,5 +183,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Ingredient'
-        fullTextQuery:
+        keyword:
           type: string
+          example: grill
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      headers:
+        WWW_Authenticate:
+          schema:
+            type: string

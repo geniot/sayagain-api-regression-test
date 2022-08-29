@@ -25,15 +25,23 @@ public class RecipesTest extends TestBase {
     }
 
     @Test
-    public void shouldPostPatchDelete() {
+    public void shouldPostGetPutDelete() {
         RecipeDto inRecipeDto = createRecipe();
+        //post
         RecipeDto outRecipeDto = saveRecipe(inRecipeDto);
 
         assertThat(inRecipeDto).usingRecursiveComparison().ignoringFields("id").isEqualTo(outRecipeDto);
         assertNotNull(outRecipeDto.getId());
         REQUEST.get("/recipes").then().statusCode(HttpStatus.SC_OK).body("", Matchers.hasSize(1));
 
-        //patch
+        //get
+        RecipeDto outGetRecipeDto = loadRecipe(outRecipeDto.getId());
+        assertThat(outRecipeDto).usingRecursiveComparison().ignoringFields("ingredients").isEqualTo(outGetRecipeDto);
+        //todo: fix empty vs null
+        assertTrue(outRecipeDto.getIngredients() == null || outRecipeDto.getIngredients().isEmpty());
+        assertTrue(outGetRecipeDto.getIngredients() == null || outGetRecipeDto.getIngredients().isEmpty());
+
+        //put
         outRecipeDto.setTitle(null);
         REQUEST.body(outRecipeDto).put("/recipes");
 
@@ -148,10 +156,10 @@ public class RecipesTest extends TestBase {
         inRecipeDto.setDescription("some interesting recipe");
         REQUEST.body(inRecipeDto).post("/recipes").as(RecipeDto.class);
 
-        searchCriteriaDto.setFullTextQuery("any");
+        searchCriteriaDto.setKeyword("any");
         search(searchCriteriaDto, 0);
 
-        searchCriteriaDto.setFullTextQuery("interest");
+        searchCriteriaDto.setKeyword("interest");
         search(searchCriteriaDto, 1);
     }
 
