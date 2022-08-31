@@ -1,5 +1,6 @@
 import io.github.geniot.sayagain.gen.model.RecipeDto;
 import io.github.geniot.sayagain.gen.model.SearchCriteriaDto;
+import io.restassured.http.Header;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
@@ -28,7 +29,7 @@ public class RecipesTest extends TestBase {
     public void shouldPostGetPutDelete() {
         RecipeDto inRecipeDto = createRecipe();
         //post
-        RecipeDto outRecipeDto = saveRecipe(inRecipeDto);
+        RecipeDto outRecipeDto = saveRecipe(BEARER_1, inRecipeDto);
 
         assertThat(inRecipeDto).usingRecursiveComparison().ignoringFields("id").isEqualTo(outRecipeDto);
         assertNotNull(outRecipeDto.getId());
@@ -69,15 +70,15 @@ public class RecipesTest extends TestBase {
         SearchCriteriaDto searchCriteriaDto = new SearchCriteriaDto();
         searchCriteriaDto.setVegetarian(true);
 
-        search(searchCriteriaDto, 0);
+        search(BEARER_1, searchCriteriaDto, 0);
 
         outRecipeDto.setVegetarian(true);
         request().header(BEARER_1).body(outRecipeDto).put("/recipes");
 
-        search(searchCriteriaDto, 1);
+        search(BEARER_1, searchCriteriaDto, 1);
 
         searchCriteriaDto.setVegetarian(null);
-        search(searchCriteriaDto, 1);
+        search(BEARER_1, searchCriteriaDto, 1);
 
     }
 
@@ -90,15 +91,15 @@ public class RecipesTest extends TestBase {
         SearchCriteriaDto searchCriteriaDto = new SearchCriteriaDto();
         searchCriteriaDto.setServings(2);
 
-        search(searchCriteriaDto, 0);
+        search(BEARER_1, searchCriteriaDto, 0);
 
         outRecipeDto.setServings(2);
         request().header(BEARER_1).body(outRecipeDto).put("/recipes");
 
-        search(searchCriteriaDto, 1);
+        search(BEARER_1, searchCriteriaDto, 1);
 
         searchCriteriaDto.setServings(null);
-        search(searchCriteriaDto, 1);
+        search(BEARER_1, searchCriteriaDto, 1);
 
     }
 
@@ -113,16 +114,16 @@ public class RecipesTest extends TestBase {
         searchCriteriaDto.setServings(3);
         searchCriteriaDto.setVegetarian(true);
 
-        search(searchCriteriaDto, 0);
+        search(BEARER_1, searchCriteriaDto, 0);
 
         outRecipeDto.setVegetarian(true);
         request().header(BEARER_1).body(outRecipeDto).put("/recipes");
 
-        search(searchCriteriaDto, 1);
+        search(BEARER_1, searchCriteriaDto, 1);
 
         searchCriteriaDto.setVegetarian(null);
         searchCriteriaDto.setServings(null);
-        search(searchCriteriaDto, 1);
+        search(BEARER_1, searchCriteriaDto, 1);
 
     }
 
@@ -138,14 +139,14 @@ public class RecipesTest extends TestBase {
         request().header(BEARER_1).body(inRecipeDto).post("/recipes").as(RecipeDto.class);
 
         searchCriteriaDto.setIncludeIngredients(List.of(createIngredient("sugar")));
-        search(searchCriteriaDto, 0);
+        search(BEARER_1, searchCriteriaDto, 0);
 
         searchCriteriaDto.setIncludeIngredients(List.of(createIngredient("salt")));
-        search(searchCriteriaDto, 1);
+        search(BEARER_1, searchCriteriaDto, 1);
 
         searchCriteriaDto.setIncludeIngredients(null);
         searchCriteriaDto.setExcludeIngredients(List.of(createIngredient("salt")));
-        search(searchCriteriaDto, 0);
+        search(BEARER_1, searchCriteriaDto, 0);
     }
 
     @Test
@@ -157,17 +158,10 @@ public class RecipesTest extends TestBase {
         request().header(BEARER_1).body(inRecipeDto).post("/recipes").as(RecipeDto.class);
 
         searchCriteriaDto.setKeyword("any");
-        search(searchCriteriaDto, 0);
+        search(BEARER_1, searchCriteriaDto, 0);
 
         searchCriteriaDto.setKeyword("interest");
-        search(searchCriteriaDto, 1);
+        search(BEARER_1, searchCriteriaDto, 1);
     }
-
-    private void search(SearchCriteriaDto searchCriteriaDto, int expectedSize) {
-        Response searchResponse = request().header(BEARER_1).body(searchCriteriaDto).post("/recipes/search");
-        List<RecipeDto> outRecipesListDto = searchResponse.body().jsonPath().getList("", RecipeDto.class);
-        assertEquals(expectedSize, outRecipesListDto.size());
-    }
-
 
 }

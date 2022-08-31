@@ -14,7 +14,7 @@ public class IngredientsTest extends TestBase {
     public void shouldPostWithIngredients() {
         RecipeDto inRecipeDto = createRecipe();
         inRecipeDto.setIngredients(List.of(createIngredient("potatoes")));
-        RecipeDto outRecipeDto = saveRecipe(inRecipeDto);
+        RecipeDto outRecipeDto = saveRecipe(BEARER_1, inRecipeDto);
 
         assertThat(inRecipeDto).usingRecursiveComparison().ignoringFields("id", "ingredients.id").isEqualTo(outRecipeDto);
 
@@ -33,7 +33,7 @@ public class IngredientsTest extends TestBase {
                 createIngredient("potatoes"),
                 createIngredient("salt")));
 
-        RecipeDto outRecipeDto = saveRecipe(inRecipeDto);
+        RecipeDto outRecipeDto = saveRecipe(BEARER_1, inRecipeDto);
         assertNotNull(outRecipeDto.getIngredients());
         outRecipeDto.getIngredients().remove(0);
 
