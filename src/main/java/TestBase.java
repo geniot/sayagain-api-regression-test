@@ -1,5 +1,6 @@
 import io.github.geniot.sayagain.gen.model.IngredientDto;
 import io.github.geniot.sayagain.gen.model.RecipeDto;
+import io.github.geniot.sayagain.gen.model.UserDto;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
@@ -15,28 +16,28 @@ import java.util.Random;
 import java.util.UUID;
 
 public class TestBase {
-    public RequestSpecification REQUEST;
-    public Header BEARER;
+    public Header BEARER_1;
 
     Random random = new Random(System.currentTimeMillis());
 
     @Before
     public void setup() {
-        REQUEST.delete("/testing/recipes").then().statusCode(HttpStatus.SC_OK);
-        REQUEST.delete("/testing/ingredients").then().statusCode(HttpStatus.SC_OK);
-        REQUEST.delete("/testing/users").then().statusCode(HttpStatus.SC_OK);
+        request().delete("/testing/recipes").then().statusCode(HttpStatus.SC_OK);
+        request().delete("/testing/ingredients").then().statusCode(HttpStatus.SC_OK);
+        request().delete("/testing/users").then().statusCode(HttpStatus.SC_OK);
 
         //signup
-        REQUEST.header("X-email", "test@test.com")
-                .header("X-password", "Somepass-2")
-                .get("/users/signup").then().statusCode(HttpStatus.SC_OK);
+        UserDto userDto = new UserDto();
+        userDto.setEmail("test@test.com");
+        userDto.setPassword("Somepass-2");
+        request().body(userDto).post("/users/signup").then().statusCode(HttpStatus.SC_OK);
 
         //signin
-        Response signInResponse = REQUEST.get("/users/signin");
+        Response signInResponse = request().body(userDto).post("/users/signin");
         signInResponse.then().statusCode(HttpStatus.SC_OK);
         String jwtToken = signInResponse.asString();//or response.then().extract().body().asString();
 
-        BEARER = new Header("Authorization", "Bearer " + jwtToken);
+        BEARER_1 = new Header("Authorization", "Bearer " + jwtToken);
     }
 
     public TestBase() {
@@ -57,8 +58,10 @@ public class TestBase {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        //basic request setting
-        REQUEST = RestAssured.given().contentType(ContentType.JSON);
+    }
+
+    public RequestSpecification request() {
+        return RestAssured.given().contentType(ContentType.JSON);
     }
 
     RecipeDto createRecipe() {
@@ -77,13 +80,13 @@ public class TestBase {
     }
 
     RecipeDto saveRecipe(RecipeDto inRecipeDto) {
-        Response createRecipeResponse = REQUEST.header(BEARER).body(inRecipeDto).post("/recipes");
+        Response createRecipeResponse = request().header(BEARER_1).body(inRecipeDto).post("/recipes");
         createRecipeResponse.then().assertThat().statusCode(HttpStatus.SC_CREATED);
         return createRecipeResponse.as(RecipeDto.class);
     }
 
     RecipeDto loadRecipe(Integer id) {
-        Response getRecipeResponse = REQUEST.header(BEARER).get("/recipes/" + id);
+        Response getRecipeResponse = request().header(BEARER_1).get("/recipes/" + id);
         getRecipeResponse.then().assertThat().statusCode(HttpStatus.SC_OK);
         return getRecipeResponse.as(RecipeDto.class);
     }

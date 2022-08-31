@@ -18,10 +18,10 @@ public class IngredientsTest extends TestBase {
 
         assertThat(inRecipeDto).usingRecursiveComparison().ignoringFields("id", "ingredients.id").isEqualTo(outRecipeDto);
 
-        REQUEST.delete("/recipes/" + outRecipeDto.getId()).then().statusCode(HttpStatus.SC_OK);
+        request().header(BEARER_1).delete("/recipes/" + outRecipeDto.getId()).then().statusCode(HttpStatus.SC_OK);
 
         //removing a recipe shouldn't remove an ingredient, no cascade delete
-        REQUEST.get("/testing/ingredients").then()
+        request().header(BEARER_1).get("/testing/ingredients").then()
                 .statusCode(HttpStatus.SC_OK)
                 .body("", Matchers.hasSize(1));
     }
@@ -37,9 +37,9 @@ public class IngredientsTest extends TestBase {
         assertNotNull(outRecipeDto.getIngredients());
         outRecipeDto.getIngredients().remove(0);
 
-        REQUEST.body(outRecipeDto).put("/recipes");
+        request().header(BEARER_1).body(outRecipeDto).put("/recipes");
 
-        RecipeDto outPatchedRecipeDto = REQUEST.get("/recipes/" + outRecipeDto.getId()).as(RecipeDto.class);
+        RecipeDto outPatchedRecipeDto = request().header(BEARER_1).get("/recipes/" + outRecipeDto.getId()).as(RecipeDto.class);
         assertNotNull(outPatchedRecipeDto.getIngredients());
         assertEquals(1, outPatchedRecipeDto.getIngredients().size());
     }
