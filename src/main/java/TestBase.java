@@ -1,9 +1,8 @@
 import io.github.geniot.sayagain.gen.model.IngredientDto;
 import io.github.geniot.sayagain.gen.model.RecipeDto;
 import io.restassured.RestAssured;
-import io.restassured.filter.log.RequestLoggingFilter;
-import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
+import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
@@ -17,13 +16,27 @@ import java.util.UUID;
 
 public class TestBase {
     public RequestSpecification REQUEST;
+    public Header BEARER;
 
     Random random = new Random(System.currentTimeMillis());
 
     @Before
     public void setup() {
-        REQUEST.delete("/recipes").then().statusCode(HttpStatus.SC_OK);
-        REQUEST.delete("/ingredients").then().statusCode(HttpStatus.SC_OK);
+        REQUEST.delete("/testing/recipes").then().statusCode(HttpStatus.SC_OK);
+        REQUEST.delete("/testing/ingredients").then().statusCode(HttpStatus.SC_OK);
+        REQUEST.delete("/testing/users").then().statusCode(HttpStatus.SC_OK);
+
+        //signup
+        REQUEST.header("X-email", "test@test.com")
+                .header("X-password", "Somepass-2")
+                .get("/users/signup").then().statusCode(HttpStatus.SC_OK);
+
+        //signin
+        Response signInResponse = REQUEST.get("/users/signin");
+        signInResponse.then().statusCode(HttpStatus.SC_OK);
+        String jwtToken = signInResponse.asString();//or response.then().extract().body().asString();
+
+        BEARER = new Header("Authorization", "Bearer " + jwtToken);
     }
 
     public TestBase() {
@@ -38,7 +51,7 @@ public class TestBase {
                 RestAssured.port = Integer.parseInt(props.getProperty("api.port"));
             }
             RestAssured.basePath = props.getProperty("api.path");
-            RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+//            RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
             RestAssured.useRelaxedHTTPSValidation();
 
         } catch (IOException ex) {
@@ -64,13 +77,13 @@ public class TestBase {
     }
 
     RecipeDto saveRecipe(RecipeDto inRecipeDto) {
-        Response createRecipeResponse = REQUEST.body(inRecipeDto).post("/recipes");
+        Response createRecipeResponse = REQUEST.header(BEARER).body(inRecipeDto).post("/recipes");
         createRecipeResponse.then().assertThat().statusCode(HttpStatus.SC_CREATED);
         return createRecipeResponse.as(RecipeDto.class);
     }
 
     RecipeDto loadRecipe(Integer id) {
-        Response getRecipeResponse = REQUEST.get("/recipes/" + id);
+        Response getRecipeResponse = REQUEST.header(BEARER).get("/recipes/" + id);
         getRecipeResponse.then().assertThat().statusCode(HttpStatus.SC_OK);
         return getRecipeResponse.as(RecipeDto.class);
     }

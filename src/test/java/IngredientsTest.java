@@ -21,7 +21,7 @@ public class IngredientsTest extends TestBase {
         REQUEST.delete("/recipes/" + outRecipeDto.getId()).then().statusCode(HttpStatus.SC_OK);
 
         //removing a recipe shouldn't remove an ingredient, no cascade delete
-        REQUEST.get("/ingredients").then()
+        REQUEST.get("/testing/ingredients").then()
                 .statusCode(HttpStatus.SC_OK)
                 .body("", Matchers.hasSize(1));
     }
