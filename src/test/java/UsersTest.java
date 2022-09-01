@@ -32,6 +32,6 @@ public class UsersTest extends TestBase {
         Response signUpResponse = request().body(userDto).post("/users/signup");
         signUpResponse.then().statusCode(HttpStatus.SC_UNPROCESSABLE_ENTITY);
         String validationErrors = signUpResponse.jsonPath().get("message");
-        assertEquals(validationErrors, "Email should be valid\r\nPassword cannot be empty\r\n");
+        assertEquals(validationErrors, "Email should be valid\nPassword cannot be empty\n");
     }
 }
