@@ -1,3 +1,4 @@
+import io.github.geniot.sayagain.gen.model.ApiErrorDto;
 import io.github.geniot.sayagain.gen.model.RecipeDto;
 import io.github.geniot.sayagain.gen.model.SearchCriteriaDto;
 import io.github.geniot.sayagain.gen.model.UserDto;
@@ -5,7 +6,10 @@ import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class UsersTest extends TestBase {
 
@@ -31,7 +35,17 @@ public class UsersTest extends TestBase {
         userDto.setPassword(null);
         Response signUpResponse = request().body(userDto).post("/users/signup");
         signUpResponse.then().statusCode(HttpStatus.SC_UNPROCESSABLE_ENTITY);
-        String validationErrors = signUpResponse.jsonPath().get("message");
-        assertEquals(validationErrors, "Email should be valid\nPassword cannot be empty\n");
+
+        ApiErrorDto expectedApiErrorDto = new ApiErrorDto();
+        expectedApiErrorDto.setStatus("422 UNPROCESSABLE_ENTITY");
+        expectedApiErrorDto.setMessage("Some fields are invalid.");
+        List<String> expectedErrors = new ArrayList<>();
+        expectedErrors.add("Email is invalid.");
+        expectedErrors.add("Password cannot be empty.");
+        expectedApiErrorDto.setErrors(expectedErrors);
+
+        ApiErrorDto outApiErrorDto = signUpResponse.jsonPath().getObject("", ApiErrorDto.class);
+
+        assertThat(expectedApiErrorDto).usingRecursiveComparison().isEqualTo(outApiErrorDto);
     }
 }

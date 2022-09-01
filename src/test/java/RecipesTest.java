@@ -1,7 +1,5 @@
 import io.github.geniot.sayagain.gen.model.RecipeDto;
 import io.github.geniot.sayagain.gen.model.SearchCriteriaDto;
-import io.restassured.http.Header;
-import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -31,7 +29,10 @@ public class RecipesTest extends TestBase {
         //post
         RecipeDto outRecipeDto = saveRecipe(BEARER_1, inRecipeDto);
 
-        assertThat(inRecipeDto).usingRecursiveComparison().ignoringFields("id").isEqualTo(outRecipeDto);
+        assertThat(inRecipeDto).usingRecursiveComparison().ignoringFields("id", "ingredients").isEqualTo(outRecipeDto);
+        assertTrue(inRecipeDto.getIngredients() == null || inRecipeDto.getIngredients().isEmpty());
+        assertTrue(outRecipeDto.getIngredients() == null || outRecipeDto.getIngredients().isEmpty());
+
         assertNotNull(outRecipeDto.getId());
         request().header(BEARER_1).get("/testing/recipes").then().statusCode(HttpStatus.SC_OK).body("", Matchers.hasSize(1));
 

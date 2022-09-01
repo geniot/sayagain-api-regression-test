@@ -4,10 +4,12 @@ info:
   description: Application which allows users to manage their favourite recipes.
   version: 0.0.1
 servers:
-  - url: https://localhost/api
-    description: Localhost (dev) server
   - url: https://sayagain.app/api
-    description: Main (production) server
+    description: Production server
+  - url: https://192.168.2.104/sayagain/api
+    description: Test server
+  - url: https://localhost/api
+    description: Localhost server
 tags:
   - name: recipe
     description: Everything about your Recipes
@@ -33,10 +35,6 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            text/plain:
-              schema:
-                type: string
 
   /users/signup:
     post:
@@ -54,10 +52,8 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            text/plain:
-              schema:
-                type: string
+        '422':
+          $ref: '#/components/schemas/ApiError'
 
   /recipes:
     post:
@@ -82,8 +78,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Recipe'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
 
     put:
       security:
@@ -102,8 +96,6 @@ paths:
       responses:
         '200':
           description: OK
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
 
   /recipes/{recipeId}:
     get:
@@ -128,8 +120,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Recipe'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
 
     delete:
       security:
@@ -149,8 +139,6 @@ paths:
       responses:
         '200':
           description: OK
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
 
   /recipes/search:
     post:
@@ -174,8 +162,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Recipe'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
 components:
   securitySchemes:
     bearerAuth:
@@ -183,6 +169,18 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    ApiError:
+      title: ApiError
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
     User:
       title: User
       type: object
@@ -245,10 +243,3 @@ components:
         keyword:
           type: string
           example: grill
-  responses:
-    UnauthorizedError:
-      description: Authentication information is missing or invalid
-      headers:
-        WWW_Authenticate:
-          schema:
-            type: string
