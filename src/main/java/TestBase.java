@@ -3,6 +3,8 @@ import io.github.geniot.sayagain.gen.model.RecipeDto;
 import io.github.geniot.sayagain.gen.model.SearchCriteriaDto;
 import io.github.geniot.sayagain.gen.model.UserDto;
 import io.restassured.RestAssured;
+import io.restassured.filter.log.RequestLoggingFilter;
+import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
@@ -61,7 +63,7 @@ public class TestBase {
                 RestAssured.port = Integer.parseInt(props.getProperty("api.port"));
             }
             RestAssured.basePath = props.getProperty("api.path");
-//            RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+            RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
             RestAssured.useRelaxedHTTPSValidation();
 
         } catch (IOException ex) {
